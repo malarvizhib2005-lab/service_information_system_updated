@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ mode }} Service{% endblock %}
+{% block content %}
+<div class="page-heading"><div><h1>{{ mode }} Service Information</h1><p>Enter the customer and service case details below.</p></div><a class="btn outline" href="{{ url_for('index') }}">Back to List</a></div>
+<form class="form-card" method="POST">
+  <div class="form-grid">
+    <label>Customer Name *<input name="name" required maxlength="128" value="{{ service.get('name','') }}"></label>
+    <label>Email<input type="email" name="email" value="{{ service.get('email','') }}"></label>
+    <label>Customer ID<input type="number" name="customerID" value="{{ service.get('customerID') or '' }}"></label>
+    <label>Company Name<input name="companyName" value="{{ service.get('companyName','') }}"></label>
+    <label>Phone Number<input name="phoneNumber" value="{{ service.get('phoneNumber','') }}"></label>
+    <label>Product ID<input name="productID" value="{{ service.get('productID','') }}"></label>
+    <label>Product Type<input name="productType" value="{{ service.get('productType','') }}"></label>
+    <label>Subcategory<input name="subcategoryName" value="{{ service.get('subcategoryName','') }}"></label>
+    <label>Location
+      <input name="locationName" list="locationOptions" value="{{ service.get('locationName','') }}" placeholder="Select or type a location">
+      <datalist id="locationOptions">
+        {% for location in locations %}<option value="{{ location }}">{% endfor %}
+      </datalist>
+    </label>
+    <label>Religion
+      <input name="religionName" list="religionOptions" value="{{ service.get('religionName','') }}" placeholder="Select or type a religion">
+      <datalist id="religionOptions">
+        {% for religion in religions %}<option value="{{ religion }}">{% endfor %}
+      </datalist>
+    </label>
+    <label>Region
+      <select name="regionName">
+        <option value="">Select region</option>
+        {% for region in regions %}
+          <option value="{{ region }}" {% if service.get('regionName') == region %}selected{% endif %}>{{ region }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Status
+      <select name="status">
+        {% for status in statuses %}
+          <option value="{{ status }}" {% if service.get('status', 'RECEIVED') == status %}selected{% endif %}>{{ status }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>User ID<input type="number" name="userID" value="{{ service.get('userID') or '' }}"></label>
+    <label>TAT Target (days)<input type="number" min="1" name="tatTargetDays" value="{{ service.get('tatTargetDays') or 7 }}"></label>
+  </div>
+  <label>Issue Description<textarea name="issueDescription" rows="4">{{ service.get('issueDescription','') }}</textarea></label>
+  <label>Remarks<textarea name="remarks" rows="3">{{ service.get('remarks','') }}</textarea></label>
+  <div class="form-actions"><button class="btn primary" type="submit">{{ 'Save Changes' if mode == 'Edit' else 'Create Service' }}</button><a class="btn outline" href="{{ url_for('index') }}">Cancel</a></div>
+</form>
+{% endblock %}

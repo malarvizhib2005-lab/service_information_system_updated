@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}All Service Info{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div><h1>All Service Info</h1><p>Manage, track and update customer service cases.</p></div>
+  <a class="btn primary" href="{{ url_for('add') }}">＋ Add Service</a>
+</section>
+
+<form class="filter-panel" method="GET" action="{{ url_for('index') }}">
+  <div class="filter-grid">
+    <label>Date Raised
+      <select name="date_range">
+        <option value="all" {% if filters.get('date_range') in ['', 'all'] %}selected{% endif %}>All dates</option>
+        <option value="7" {% if filters.get('date_range') == '7' %}selected{% endif %}>Last 7 days</option>
+        <option value="30" {% if filters.get('date_range') == '30' %}selected{% endif %}>Last 30 days</option>
+        <option value="90" {% if filters.get('date_range') == '90' %}selected{% endif %}>Last 90 days</option>
+        <option value="month" {% if filters.get('date_range') == 'month' %}selected{% endif %}>This month</option>
+        <option value="last_month" {% if filters.get('date_range') == 'last_month' %}selected{% endif %}>Last month</option>
+        <option value="financial_year" {% if filters.get('date_range') in ['financial_year', 'fy_current'] %}selected{% endif %}>Current financial year</option>
+      </select>
+    </label>
+    <label>Location
+      <select name="location">
+        <option value="">All locations</option>
+        {% for item in locations %}
+          <option value="{{ item }}" {% if filters.get('location') == item %}selected{% endif %}>{{ item }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Region
+      <select name="region">
+        <option value="">All regions</option>
+        {% for item in regions %}
+          <option value="{{ item }}" {% if filters.get('region') == item %}selected{% endif %}>{{ item }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Religion
+      <select name="religion">
+        <option value="">All religions</option>
+        {% for item in religions %}
+          <option value="{{ item }}" {% if filters.get('religion') == item %}selected{% endif %}>{{ item }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Status
+      <select name="status">
+        <option value="">All statuses</option>
+        {% for item in statuses %}
+          <option value="{{ item }}" {% if filters.get('status') == item %}selected{% endif %}>{{ item }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </div>
+  <div class="filter-bottom">
+    <label class="check-label"><input type="checkbox" name="reopened" value="1" {% if filters.get('reopened') == '1' %}checked{% endif %}> Reopen</label>
+    <label class="check-label">TAT Filter
+      <select name="tat_filter" class="small-select">
+        <option value="">All</option>
+        <option value="within" {% if filters.get('tat_filter') == 'within' %}selected{% endif %}>Within TAT</option>
+        <option value="breached" {% if filters.get('tat_filter') == 'breached' %}selected{% endif %}>TAT Breached</option>
+      </select>
+    </label>
+    <div class="filter-actions">
+      <button class="btn primary" type="submit">Filter</button>
+      <a class="btn outline" href="{{ url_for('index') }}">Reset</a>
+    </div>
+  </div>
+</form>
+
+<div class="table-toolbar">
+  <div><strong>{{ services|length }}</strong> records</div>
+  <div class="toolbar-actions">
+    <a class="btn outline" href="{{ url_for('export_csv', **filters) }}">Export CSV</a>
+    <button class="btn outline" type="button" onclick="window.print()">Print Table</button>
+    <label class="search-box">Search
+      <input id="tableSearch" type="search" placeholder="Search visible records...">
+    </label>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table id="serviceTable">
+  <thead>
+    <tr>
+      <th>Actions</th><th>Case ID</th><th>Requested</th><th>Name / Email / Phone</th>
+      <th>Product (Subcategory)</th><th>Region (Location)</th><th>Status</th><th>TAT (Days)</th><th>TAT Status</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for s in services %}
+    <tr>
+      <td class="actions">
+        <a title="View" href="{{ url_for('view', service_id=s.id) }}">◉</a>
+        <a title="Edit" href="{{ url_for('edit', service_id=s.id) }}">✎</a>
+        <form method="POST" action="{{ url_for('delete', service_id=s.id) }}" onsubmit="return confirm('Delete this service record?')">
+          <button title="Delete" class="icon-btn danger-text" type="submit">▤</button>
+        </form>
+        {% if s.status == 'CLOSED' %}
+        <form method="POST" action="{{ url_for('reopen', service_id=s.id) }}" onsubmit="return confirm('Reopen this case?')">
+          <button class="mini-btn" type="submit">Re-open</button>
+        </form>
+        {% endif %}
+      </td>
+      <td><strong>#{{ s.id }}</strong></td>
+      <td>{{ s.requestTime|datefmt }}</td>
+      <td><strong>{{ s.name }}</strong><small>{{ s.email or '' }}<br>{{ s.phoneNumber or '' }}</small></td>
+      <td>{{ s.productType or '-' }}<small>{{ s.subcategoryName or '' }}</small></td>
+      <td>{{ s.regionName or '-' }}<small>{{ s.locationName or '' }}</small></td>
+      <td><span class="status status-{{ s.status|lower|replace('-', '') }}">{{ s.status }}</span></td>
+      <td>{{ s.tat_days if s.tat_days is not none else '-' }}</td>
+      <td><span class="tat {{ 'good' if s.tat_status == 'Within TAT' else 'bad' }}">{{ s.tat_status }}</span></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="9" class="empty">No service records found. Add your first record.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Service #{{ service.id }}{% endblock %}
+{% block content %}
+<div class="page-heading"><div><h1>Service Case #{{ service.id }}</h1><p>Service record details.</p></div><div><a class="btn outline" href="{{ url_for('index') }}">Back</a> <a class="btn primary" href="{{ url_for('edit', service_id=service.id) }}">Edit</a></div></div>
+<div class="details-card">
+  {% for label, key in [('Customer Name','name'),('Email','email'),('Customer ID','customerID'),('Company','companyName'),('Phone','phoneNumber'),('Product ID','productID'),('Product Type','productType'),('Issue','issueDescription'),('Location','locationName'),('Religion','religionName'),('Region','regionName'),('Subcategory','subcategoryName'),('Status','status'),('Requested','requestTime'),('Remarks','remarks'),('TAT Target (days)','tatTargetDays')] %}
+    <div class="detail"><span>{{ label }}</span><strong>{{ service[key] or '-' }}</strong></div>
+  {% endfor %}
+  <div class="detail"><span>TAT (days)</span><strong>{{ service.tat_days if service.tat_days is not none else '-' }}</strong></div>
+  <div class="detail"><span>TAT Status</span><strong>{{ service.tat_status }}</strong></div>
+  <div class="detail"><span>Reopened</span><strong>{{ 'Yes' if service.isReopened else 'No' }}</strong></div>
+</div>
+{% endblock %}
